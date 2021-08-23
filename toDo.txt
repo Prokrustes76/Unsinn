@@ -1,0 +1,31 @@
+  Enemies appearance independent of Fight Dura (Arrow System)
+  Final Boss
+  More Abilites (//Poison, 
+                   Slow -all?-, 
+                   heal others, 
+                 //mana burn, 
+                 //arm/dam increase)
+
+find Weapons
+Wands = Weapons 
+introduce gem sockets
+gem Class
+insert gems into sockets
+values
+weapon, 
+// shield
+
+// DoTs (enemy && heroes)
+// Hero talents - shield wall, etc.
+
+Spell Selection
+//  More Spells
+// Talents
+
+//Shop
+// Trainer?
+  Way to get other/more Heroes
+
+  Move Party
+
+ // Sounds
