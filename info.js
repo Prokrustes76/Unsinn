@@ -2,7 +2,6 @@ class Info {
   constructor() {
     this.monsters   = []
     this.items      = []
-    this.wands      = []
     this.scrolls    = []
     this.sounds     = []
     this.talents    = []
@@ -87,11 +86,6 @@ class Info {
     for (let i = 0; i < 5; i++) {
       this.items[i]       = new Image()
       this.items[i].src   = `./rsc/item${i}.png`
-    }
-    
-    for (let i = 0; i < 4; i++) {
-      this.wands[i]       = new Image()
-      this.wands[i].src   = `./rsc/wand${i}.png`
     }
 
     for (let i = 0; i < 5; i++) {
@@ -199,7 +193,8 @@ class Info {
       text.push([`Prot.:  ${round(obj.armor,1)}%`]) 
       text.push([``])  
       text.push([`Att Power:  ${round(obj.powDam,1)}`])
-      let val = obj.powDam * (1 + obj.crit / 100)  / (2.5 * (1 - obj.haste / 100))
+      let val = (obj == healer ? obj.inv[5].power + obj.powDam - 25 : obj.powDam) 
+                * (1 + obj.crit / 100)  / (2.5 * (1 - obj.haste / 100))
       text.push([`DPS      :  ${round(val,1)}`])
       if (obj.powHeal > 0)
       text.push([`Heal Power: ${round(obj.powHeal,1)}`])
@@ -216,20 +211,20 @@ class Info {
       }
     }
 
-    else if (obj instanceof Armor) {
+    else if (obj instanceof Gear) {
       text.push(obj.name)
-      text.push([`Level: ${obj.level}`])
+      text.push([`Level:  ${obj.level}`])
       if ((obj.level - 1) > 1)
         text.push([`Requ.: Level ${(obj.level - 1) * 2}`])
       if (obj.stats) 
         text.push([`${obj.stats.cha}: +${obj.stats.val}`])
       text.push([``])  
-      text.push([`Armor: ${Math.floor(obj.rs)}`])
-      text.push([`Slots: ${obj.slotAmount}`])
+      obj instanceof Armor ? text.push([`Armor:  ${Math.floor(obj.rs)}`]) : 
+                             text.push([`Damage: ${Math.floor(obj.power)}`])
+      text.push([`Slots:  ${obj.slotAmount}`])
       let buyPrice  = Math.ceil ((obj.price || obj.getPrice()) * game.buyFactor)
       let sellPrice = Math.floor((obj.price || obj.getPrice())* game.sellFactor)
-      text.push([`Price: ${buyPrice}   (Sale: ${sellPrice})`])
-
+      text.push([`Price:  ${buyPrice}   (Sale: ${sellPrice})`])
     }
 
     else if (obj instanceof StatBox) {

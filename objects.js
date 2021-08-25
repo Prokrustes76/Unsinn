@@ -97,10 +97,15 @@ class Item {
     let loot
     
     if (rand(0, 100) < lootChancePerLevel) {
-      if (rand(0, 100) < 50) {
+      if (rand(0, 100) < 43) {
         let level = Math.floor(rand(0, 13)) * 5 
         level += armorLevel
         loot = new Armor(level)
+      }
+      else if(rand(0, 100) < 14) {
+        let level = 70
+        level += armorLevel
+        loot = new Weapon(level)
       }
       else {
         let zufall = rand(0, 100)

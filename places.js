@@ -91,14 +91,21 @@ class NPC {
     }
   }
 
+  newItemForSmith(zufall) {
+    let gibtsWand = Math.random() < .05
+    let level = 69 + healer.inv[5].level + Math.round(Math.random() * .8)
+    return gibtsWand ? new Weapon(level) : new Armor(zufall)
+  }
+
   fillVendorSlots() {
     if (this.nr == 0) {
-      let healLev = Math.floor ((healer.level + 1) / 2)
+      let healLev = Math.floor((healer.level + 1) / 2)
       for (let i = 0; i < 12; i++) {
         let level = i < 6 ? healLev - 1 : healLev
         let zufall = Math.floor(Math.random() * 13) * 5 + level
-        this.products.slots[i].putIntoSlot (new Armor(zufall))
+        this.products.slots[i].putIntoSlot (this.newItemForSmith(zufall))
       }
+      
     }
     if (this.nr == 1) {
       let lev = Math.floor(healer.level / 4)
@@ -113,20 +120,19 @@ class NPC {
     for (let s of this.products.slots)
       if (!s.content || game.timePassed - s.content.createdTime > 4 * 60 * 60) {
         let zufall = Math.floor(Math.random() * 13) * 5
-        zufall += Math.floor((healer.level / 2) * (Math.random() * .5 + .5))
-        s.content = new Armor(zufall)
+            zufall += Math.floor((healer.level / 2) * (Math.random() * .5 + .5))
+        s.content = this.newItemForSmith(zufall)
       }
   }
   
-
   show(x = this.pos.x, y = this.pos.y, w = this.pos.w, h = this.pos.h) {
     rect(x, y, w, h, '#333')
     ctx.drawImage(this.pic, 500, y + 5, 110, 144)
 
-    if (this.name == 'Smith') {
+    if (this.name == 'Smith') 
       for (let s of this.products.slots)
-        s.show(this.name)
-    }
+        s.show()
+    
   }
 
 }

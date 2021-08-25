@@ -139,16 +139,14 @@ function round(amount, digits = 0) {
 
 function cheatA() {
   for (let e of game.enemies)
-    e.hpCurr = 1
+    e.hpCurr = 0
 
   healer.gold = 135
   for (let hero of game.party)
     hero.exp = 320
 
-  for (let i = 0; i < 8; i++) {
-    let zufall = Math.floor(Math.random() * 1.25)
-    let thing = [new Item(0, zufall), new Item(1, zufall), new Item(2, zufall), new Item(3, zufall), 
-                 new Item(4, zufall), new Armor(Math.floor(Math.random() * 13) * 5 + zufall)]
-    game.inv.add(thing[Math.floor(Math.random() * 18)] || thing[5])
+  do {
+    game.inv.add(Item.findLoot())
   }
+  while (game.inv.slots.some(slot => !slot.content))
 }

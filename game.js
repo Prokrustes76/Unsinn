@@ -40,8 +40,10 @@ class Game {
         this.scrolls.push({ type : i, level : 0, until : -10000})
       }
     }
+    
     for (let b of this.equipment.buttons)
       this.buttons.push(b)
+
     this.buttons.push(this.inv.button)
     this.buttons.push(this.statBox.button)
     this.buttons.push(this.equipment.button)
@@ -143,7 +145,7 @@ class Game {
   upgrade() {
     this.routines()
 
-    if (this.phase == 2) 
+    if (this.phase == 0 || this.phase == 2) 
       return
 
     if (!this.paused) 

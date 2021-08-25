@@ -7,12 +7,12 @@
                  //arm/dam increase)
 
 find Weapons
-Wands = Weapons 
 introduce gem sockets
 gem Class
 insert gems into sockets
 values
 weapon, 
+  // wands
 // shield
 
 // DoTs (enemy && heroes)

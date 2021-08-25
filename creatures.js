@@ -256,6 +256,7 @@ class Creature extends GameObject{
         let target = this.findSingleTarget()
         game.party[target].armorDamaged.until  = game.timePassed + 15 * 60
         game.party[target].armorDamaged.debuff += 30
+        this.hurting(game.party[target], this.value)
       }
 
       if (this.special.includes('M')) {
@@ -292,13 +293,12 @@ class Creature extends GameObject{
 
   calcDamage(factor = 1, dam) {
     let amount = dam || this.powDam * factor * rand(.9,1.1)
-        amount = this.wandDamage ? this.wandDamage() : amount
+    this.wandDamage ? amount = this.wandDamage() + (this.powDam - 25) : amount
         
-    if (this.canCrit()) amount *= (this instanceof Enemy ? 1.5 : 2)
+    if (this.canCrit()) amount *= 2
 
     this.name == 'Imp' ? mage.damDealed += amount : this.damDealed += amount
-
-    return amount
+    return amount; 
   }
 
   canDefend() {
@@ -578,18 +578,21 @@ class Ally extends Creature{
   }
 
   initInv(nr) {
-    let list =  [[,new Armor(25), new Armor(30), new Armor(55),,new Armor(60)],
-                [, new Armor(25), new Armor(30), new Armor(55),,],
-                [, new Armor(25), new Armor(30), new Armor(55),,],
-                [, new Armor(25), new Armor(50), new Armor(55),,],
-                [, new Armor(25), new Armor(50), new Armor(55),,],
-                [, new Armor(45), new Armor(50), new Armor(55),,],
-                [, new Armor(45), new Armor(50), new Armor(55),,],
-                [, new Armor(45), new Armor(50), new Armor(55),,],
-                [, new Armor(25), new Armor(30), new Armor(55),,]][nr] || []
+    let list =  [[,new Armor(25), new Armor(30), new Armor(55),,new Armor(60) ],
+                 [,new Armor(25), new Armor(30), new Armor(55),,              ],
+                 [,new Armor(25), new Armor(30), new Armor(55),,              ],
+                 [,new Armor(25), new Armor(50), new Armor(55),,              ],
+                 [,new Armor(25), new Armor(50), new Armor(55),,              ],
+                 [,new Armor(45), new Armor(50), new Armor(55),,new Weapon(70)],
+                 [,new Armor(45), new Armor(50), new Armor(55),,              ],
+                 [,new Armor(45), new Armor(50), new Armor(55),,              ],
+                 [,new Armor(25), new Armor(30), new Armor(55),,              ]][nr] || []
 
     for (let i of list)
-      if (i) i.stats = undefined
+      if (i) {
+        i.stats  = undefined
+        i.price *= .6
+      }
 
     return list 
   }
@@ -1023,6 +1026,6 @@ class Priest extends Ally {
   }
 
   wandDamage() {
-    return 35 * rand(.9, 1.1, 2)
+    return this.inv[5].power * rand(.9, 1.1, 2)
   }
 }
