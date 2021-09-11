@@ -1,7 +1,13 @@
 class Gear {
   constructor() {
     this.gems         = []  
+    this.createdTime  = game ? game.timePassed : 0
   }
+
+  static quality  = ['Simple','Solid','Fine','Pure','Great']
+  static parts    = ['Head', 'Chest', 'Legs', 'Feet', 'Mainhand', 'Offhand']
+  static material = ['Mail', 'Leather', 'Cloth'] 
+  static weapon   = ['Axe', 'Sword', 'Mace', 'Staff', 'Dagger', 'Wand']
 
   getStats() {
     let list = []
@@ -25,8 +31,9 @@ class Gear {
       else if (this.material == 'Cloth')    list = [0, 1,    3, 4, 5, 6, 7, 8]
     }
 
-    else {
+    if (this instanceof Weapon) {
       if      (this.name.includes('Wand'))  list = [         3, 4, 5, 6, 7, 8]
+      else                                  list = [0, 1, 2,    4, 5, 6]
     }
 
     let zufall = list [Math.floor(Math.random() * list.length)]
@@ -62,20 +69,15 @@ class Armor extends Gear {
     super()
     this.nr           = nr
     this.level        = (nr % 5) + 1
-    this.part         = nr < 60 ? Armor.parts[Math.floor((nr % 20) / 5)] : 'Offhand'
-    this.material     = nr < 60 ? Armor.material[Math.floor(nr / 20)]     : ''
+    this.part         = nr < 60 ? Gear.parts[Math.floor((nr % 20) / 5)] : 'Offhand'
+    this.material     = nr < 60 ? Gear.material[Math.floor(nr / 20)]    : ''
     this.picNr        = this.getPicNr(nr)    
     this.slotAmount   = this.getSlotAmount()
     this.rs           = this.calcRS()
     this.stats        = this.getStats()
     this.name         = this.getName()
     this.pos          = pos
-    this.createdTime  = game ? game.timePassed : 0
   }
-
-  static parts    = ['Head', 'Chest', 'Legs', 'Feet', 'Mainhand', 'Offhand']
-  static material = ['Mail', 'Leather', 'Cloth'] 
-  static quality  = ['Simple','Solid','Fine','Pure','Great']
 
   getPicNr(nr) {
     return [182,190,170,180,195,    24, 21,  1,  0, 19,   33,166, 88, 89,185,   66, 65, 69, 57, 76,
@@ -88,13 +90,12 @@ class Armor extends Gear {
     let price = (15 + this.rs * 0.3) * (1 + .2 * this.slotAmount) * Math.pow(1.3,this.level - 1)
     if (!this.stats) price *= .6
     return round(price)
-  
   }
 
   getName(nr = this.nr) {
     if (nr >= 60)
-      return Armor.quality[nr - 60] + ' ' + 'Shield'
-    return Armor.quality[nr % 5] 
+      return Gear.quality[nr - 60] + ' ' + 'Shield'
+    return Gear.quality[nr % 5] 
             + ' ' + this.material + ' ' +
            [this.material == 'Cloth' ? 'Cap'  : 'Helm', 
             this.material == 'Cloth' ? 'Robe' : 'Armor', 
@@ -114,7 +115,7 @@ class Armor extends Gear {
   canEquip(nr, hero) {
     if (this.name.includes('Shield') && !['Warrior', 'Paladin', 'Shaman'].includes(hero.type))
       return false
-    if (Armor.parts[nr] != this.part) 
+    if (Gear.parts[nr] != this.part) 
       return false
     if (this.material == 'Mail' && !['Warrior', 'Paladin'].includes(hero.type)) 
       return false
@@ -135,23 +136,51 @@ class Weapon extends Gear {
     this.level        = (nr % 5) + 1
     this.pos          = pos
 
-    this.name         = nr >= 70 ? ['Simple', 'Lesser', 'Solid', 'Greater', 'Master'][nr % 5] + ' Wand' : 
-                        ''
-    this.power        = nr >= 70 ? [32, 38, 46, 56, 78][nr % 5] : 
-                        0
-    this.price        = nr >= 70 ? [30, 70, 130, 220, 400][nr % 5] : 
-                        0
-    this.picNr        = nr >= 70 ? [194, 192, 193, 190, 191][nr % 5] :
-                        0
-    this.stats        = this.getStats()
+    this.name         = this.getName(nr)
+    this.part         = 'Mainhand'               
     this.slotAmount   = this.getSlotAmount()
+    this.power        = this.getPower(nr)
+    this.price        = this.getPrice(nr)
+    this.picNr        = this.getPicNr(nr)
+    this.mainStats    = this.getMainStats(nr)
+    this.stats        = this.getStats()
+  }
+
+  getName(nr) {
+    return Gear.quality[nr % 5] + ' ' + Gear.weapon[Math.floor(nr / 5)]
+  }
+
+  getPower(nr) {
+    return nr >= 25 ? [32, 38, 46, 56, 78][nr % 5] : 0
+  }
+
+  getPrice(nr) {
+    let price = [45, 55, 38, 50, 43, 45][Math.floor(nr / 5)]  * (1 + .15 * this.slotAmount) * Math.pow(1.8, this.level - 1)
+    return round(price)
+  }
+
+  getPicNr(nr) {
+    return [ 30,  25,  23,  24,  27,    210, 203, 200, 202, 197,   131, 127, 127, 118, 119,
+            194, 192,  63,  64,  67,    211, 117, 212, 115, 116,   213, 191, 193,  65,  66][nr]
+  }
+
+  getMainStats(nr) {
+    let axes   = [[2, 3], [7, 2], [13,  0], [20, -3], [25, 5]]
+    let swords = [[0, 6], [4, 6], [15, -3], [17,  5], [20, 12]]
+    let maces  = [[3, 3], [7, 1], []]
   }
 
   canEquip(nr, hero) {
-    if (this.name.includes('Wand') && !['Priest', 'Mage'].includes(hero.type))
+    if (this.name.includes('Axe')    && !['Warrior'].                   includes(hero.type) || 
+        this.name.includes('Sword')  && !['Warrior', 'Rogue'].          includes(hero.type) ||
+        this.name.includes('Mace')   && !['Warrior', 'Druid'].          includes(hero.type) ||
+        this.name.includes('Staff')  && !['Druid', 'Mage', 'Priest'].   includes(hero.type) ||
+        this.name.includes('Dagger') && !['Rogue'].                     includes(hero.type) ||
+        this.name.includes('Wand')   && !['Priest', 'Mage'].            includes(hero.type))
       return false
-
     if ((this.level - 1) * 2 > hero.level) 
+      return false
+    if (Gear.parts[nr] != this.part) 
       return false
 
     return true

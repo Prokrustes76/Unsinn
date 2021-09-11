@@ -383,9 +383,10 @@ class Creature extends GameObject{
   }
 
   heal(amount, target, spell, att = 'Ally') {
-    if (!(this instanceof Ally)) {
-      if (att != 'Ally') 
-        game.enemies[target].gainHP(amount)
+    if (!game.party[target].alive) return 
+
+    if (att == 'Enemy') {
+      game.enemies[target].gainHP(amount)
       return
     }
 
@@ -450,16 +451,16 @@ class Ally extends Creature{
     this.hots       = [[],[],[],[],[],[],[],[],[],[],[],[]]
     this.pure       = {
       armor      : 0,
-      powDam     : round([35, 48, 43, 40, 42, 25, 50, 51, 50][nr]),
+      powDam     : round([38, 38, 35, 35, 35, 25, 45, 50, 35][nr]),
       powHeal    : round([ 0, 40,  0, 40, 40, 40,  0,  0,  0][nr]),
       def        : round([ 8,  5, 10,  3,  3,  2,  2,  2,  4][nr]),
-      crit       : round([ 6,  7, 10,  6,  6,  5,  7,  7,  8][nr]),
-      haste      : round([ 6,  0, 15,  4,  6,  0,  5,  2,  8][nr]),
+      crit       : round([ 5,  7, 14,  6,  8,  5,  7,  7,  8][nr]),
+      haste      : round([ 0,  0, 28,  4, 17,  0,  5,  4,  8][nr]),
       threat     : round([62, 35, 12, 14, 13, 16, 13, 18, 14][nr]),
       hpFull     : round([500, 430, 380, 370, 350, 320, 330, 300, 350][nr] * rand(.95, 1.05), -1),
     }
     this.range         = [0, 0, 1, 1, 1, 2, 2, 2, 2][nr] || 0
-    this.picNr         = [68, 30, 57, 3, 20, 27, 7, 2, 22][nr]
+    this.picNr         = [68, 30, 20, 3, 57, 27, 7, 2, 22][nr]
     this.pic           = {x : 8 + ((3 + this.picNr) % 11) * 80, 
                           y : 26 + Math.floor((3 + this.picNr) / 11) * 124}
     this.color         = ['Tan', 'Pink', 'Yellow', '#0070DE', 'Orange', 'White', '#8787ED', '#40C7EB', '#A9D271'][nr]
@@ -522,10 +523,10 @@ class Ally extends Creature{
         let extraDam = ((mage.powDam * (1 + mage.crit / 100)  / (2.5 * (1 - mage.haste / 100))) - 22) / 3
         this.pure = {
           powHeal    : 0,
-          powDam     : [  8,  12,  18][this.level] + extraDam,
+          powDam     : [  4,   6,   8][this.level] + extraDam,
           def        : [ 10,  10,  10][this.level],
           crit       : [  0,   0,   0][this.level],
-          haste      : [  0,   0,   0][this.level],
+          haste      : [  0,   5,  10][this.level],
           threat     : [  4,   5,   7][this.level],
           hpFull     : [150, 180, 210][this.level]
         }
@@ -578,15 +579,15 @@ class Ally extends Creature{
   }
 
   initInv(nr) {
-    let list =  [[,new Armor(25), new Armor(30), new Armor(55),,new Armor(60) ],
-                 [,new Armor(25), new Armor(30), new Armor(55),,              ],
-                 [,new Armor(25), new Armor(30), new Armor(55),,              ],
-                 [,new Armor(25), new Armor(50), new Armor(55),,              ],
-                 [,new Armor(25), new Armor(50), new Armor(55),,              ],
-                 [,new Armor(45), new Armor(50), new Armor(55),,new Weapon(70)],
-                 [,new Armor(45), new Armor(50), new Armor(55),,              ],
-                 [,new Armor(45), new Armor(50), new Armor(55),,              ],
-                 [,new Armor(25), new Armor(30), new Armor(55),,              ]][nr] || []
+    let list =  [[,new Armor(25), new Armor(30), new Armor(55), new Weapon( 0), new Armor(60)],
+                 [,new Armor(25), new Armor(30), new Armor(55), new Weapon( 5),              ],
+                 [,new Armor(25), new Armor(30), new Armor(55), new Weapon(20),              ],
+                 [,new Armor(25), new Armor(50), new Armor(55), new Weapon(15),              ],
+                 [,new Armor(25), new Armor(50), new Armor(55), new Weapon(15),              ],
+                 [,new Armor(45), new Armor(50), new Armor(55), new Weapon(25),              ],
+                 [,new Armor(45), new Armor(50), new Armor(55), new Weapon(25),              ],
+                 [,new Armor(45), new Armor(50), new Armor(55), new Weapon(15),              ],
+                 [,new Armor(25), new Armor(30), new Armor(55), new Weapon(25),              ]][nr] || []
 
     for (let i of list)
       if (i) {
@@ -750,14 +751,14 @@ class Enemy extends Creature {
     this.pure       = {}                  
     this.value      = Enemy.GetValues()[nr] * diff
     //                 W = Web, P = Poison, S = Self-Heal
-    this.special    = ['', 'P','A','M','P','W','P','A', 'A', 'H'][nr]
+    this.special    = ['', 'P','A','M','P','W','P','A','', 'H'][nr]
     //                 Ogr Tro Bea Bat Gob Spi Man Cat Boa Liz
-    this.powDam     = [90, 63, 55, 30, 39, 46, 42, 52, 47, 49][nr] * diff * 1.3
+    this.powDam     = [90, 63, 55, 30, 39, 46, 42, 52, 49, 49][nr] * diff * 1.3
     this.powHeal    = [ 0,  0,  0,  0,  0,  0,  0,  0,  0, 40][nr] * diff
     this.armor      = [28, 25, 30, 16, 22, 23, 31, 20, 22, 27][nr] * diff
     this.def        = [ 5,  7,  6,  3,  7,  5,  6, 10,  6,  6][nr] * diff
     this.pure.haste = [15, 24, 20, 30, 35, 15, 35, 35, 22, 12][nr] * diff
-    this.aoe        = [15, 10, 15, 50,  0,  5,  5,  0, 20, 20][nr] * diff
+    this.aoe        = [15, 10, 15, 35,  0,  5,  5,  0, 20, 20][nr] * diff
     this.crit       = [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0][nr]
     this.specialCD  = [ 0, 13,  7, 10, 13, 14, 13,  7,  8, 15][nr]
     this.picReduce  = [ 0,  1,  0,  3,  3,  2,  2,  2,  1,  1][nr]
@@ -1026,6 +1027,6 @@ class Priest extends Ally {
   }
 
   wandDamage() {
-    return this.inv[5].power * rand(.9, 1.1, 2)
+    return this.inv[4].power * rand(.9, 1.1, 2)
   }
 }

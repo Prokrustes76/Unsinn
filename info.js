@@ -193,7 +193,7 @@ class Info {
       text.push([`Prot.:  ${round(obj.armor,1)}%`]) 
       text.push([``])  
       text.push([`Att Power:  ${round(obj.powDam,1)}`])
-      let val = (obj == healer ? obj.inv[5].power + obj.powDam - 25 : obj.powDam) 
+      let val = (obj == healer ? obj.inv[4].power + obj.powDam - 25 : obj.powDam) 
                 * (1 + obj.crit / 100)  / (2.5 * (1 - obj.haste / 100))
       text.push([`DPS      :  ${round(val,1)}`])
       if (obj.powHeal > 0)

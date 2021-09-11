@@ -90,24 +90,24 @@ class Item {
   }
 
   static findLoot() {
-    let lootChancePerLevel = [37, 60, 75, 83, 92][healer.level - 1] || 100
-    let armorLevel = Math.floor((game.difficulty - 15) / 13)
+    let lootChancePerLevel = healer.level * 3 + game.difficulty * 1.5
+    let armorLevel = Math.floor((game.difficulty - 12) / 12)
     armorLevel = Math.floor(rand(0, armorLevel))
 
     let loot
     
     if (rand(0, 100) < lootChancePerLevel) {
-      if (rand(0, 100) < 43) {
+      if (rand(0, 100) < 45) {                      // Armor = 45%
         let level = Math.floor(rand(0, 13)) * 5 
         level += armorLevel
         loot = new Armor(level)
       }
-      else if(rand(0, 100) < 14) {
-        let level = 70
+      else if(rand(0, 100) < 40) {                  // Weapon = 40% von 55%, also 22%
+        let level = Math.floor(rand(0, 6)) * 5
         level += armorLevel
         loot = new Weapon(level)
       }
-      else {
+      else {                                        // Anderes Item = Rest %, also 33% 
         let zufall = rand(0, 100)
         for (let number of Item.getCumulProb())
           if (zufall < number) {
@@ -185,7 +185,9 @@ class Button extends GameObject{
     write(this.text, this.pos.x + this.pos.w / 2, this.pos.y + this.pos.h / 2, this.size, 'goldenrod', 'center')
   }
 
-  clickOnMe() {  
+  clickOnMe() {
+    if (['Weapons', 'Armor'].includes(this.text)) 
+      game.town.npcs[0].clicked(this)
     if (game.town.npcs[3].options.includes(this))
       game.town.npcs[3].clicked(this)
     if (this.type == 'normal') {
@@ -308,15 +310,19 @@ class Slot extends GameObject{
     this.pos              = { x : 0, y : 0, w : 0, h : 0 }
   }
 
-  getPos() {
+  getPos() { 
     if (this.nr < 12)
       return { x : game.inv.pos.x + 6 + (this.nr % 4) * 50,
                y : game.inv.pos.y + 6 + Math.floor(this.nr / 4) * 50,
                w : 43, 
                h : 43}
-    let val = Math.floor(this.nr / 12) - 1
+    let val = (game.town.npcs[0].products.slots.includes(this) ?  70 : 
+               game.town.npcs[1].products.slots.includes(this) ? 220 : 370) + 
+               Math.floor((this.nr % 12) / 6) * 60 
+
+
     return { x : 625 + (this.nr % 6) * 60 ,
-             y : 70 + val * 150 + Math.floor(this.nr / (18 + val * 12)) * 60,
+             y : val,
              w : 50,
              h : 50}
   }

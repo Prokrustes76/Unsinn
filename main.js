@@ -141,7 +141,7 @@ function cheatA() {
   for (let e of game.enemies)
     e.hpCurr = 0
 
-  healer.gold = 135
+  healer.gold += 135
   for (let hero of game.party)
     hero.exp = 320
 
@@ -149,4 +149,12 @@ function cheatA() {
     game.inv.add(Item.findLoot())
   }
   while (game.inv.slots.some(slot => !slot.content))
+}
+
+function cheatB() {
+  for (let e of game.party)
+    if (!e.alive) {
+      e.alive = true
+      e.hpCurr = 100
+    }
 }

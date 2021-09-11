@@ -216,14 +216,14 @@ class WarriorTalent extends Talent {
       tank.battleStance = -Infinity
 
     if (this.name == 'Toughness')
-      tank.toughness += .05
+      tank.toughness += .04
 
     if (this.name == 'Martyrdom')
-      tank.martyrdom = this.level / 10
+      tank.martyrdom = this.level / 12
   
     if (this.name == 'Revenge') {
       tank.revenge = []
-      this.value = this.level / 125
+      this.value = this.level / 115
     }
   }
 
@@ -268,13 +268,13 @@ class RogueTalent extends Talent {
       rogue.sunderArmor += 1/3
 
     if (this.name == 'Bounty')
-      rogue.bounty += 1/6
+      rogue.bounty = 1/6
 
     if (this.name == 'Swiftness')
       rogue.swiftness = - game.timePassed - 11 * 60
 
     if (this.name == 'Poison') {
-      rogue.slowPoison = [-8, -16, -24][this.level - 1]
+      rogue.slowPoison = [-8, -17, -28][this.level - 1]
     }
 
     if (this.name == 'Kick') 
@@ -317,12 +317,12 @@ class DruidTalent extends Talent {
     if (this.name == 'Thorns')  {
       tank.thorns++
       this.valueDamage = [4, 9, 15][this.level - 1]
-      this.valueArmor  = [35, 80, 140][this.level - 1]
+      this.valueArmor  = [30, 80, 150][this.level - 1]
     }
 
     if (this.name == 'Efflorescence') {
       druid.efflorescence = true
-      this.value = [6, 14, 25][this.level - 1]
+      this.value = [7, 15, 25][this.level - 1]
     }
 
     if (this.name == 'Mark of the Wild')
@@ -332,7 +332,7 @@ class DruidTalent extends Talent {
       druid.roar = [2.5, 5, 8][this.level - 1]
 
     if (this.name == 'Moonfire') {
-      this.valueDamage = [18, 40, 66][this.level -1]
+      this.valueDamage = [20, 42, 70][this.level -1]
       druid.moonfire = 0
     }
   }
@@ -379,11 +379,11 @@ class PriestTalent extends Talent {
     }
 
     if (this.name == 'Inner Fire') {
-      healer.innerFire += [0, 90, 110, 130][this.level]
+      healer.innerFire += [0, 70, 80, 90][this.level]
     }
 
     if (this.name == 'Strong Will')
-      healer.pure.manaFull += [40, 50, 75][this.level -1]
+      healer.pure.manaFull += [40, 50, 60][this.level -1]
 
     if (this.name == 'innerFocus')
       healer.innerFocus = game.timePassed
@@ -448,7 +448,7 @@ class MageTalent extends Talent {
 
     if (this.name == 'Charisma') {
       game.sellFactor = [.25, .30, .36, .44][this.level]
-      game.buyFactor  = [  1, .94, .86, .76][this.level]
+      game.buyFactor  = [  1, .95, .88, .78][this.level]
     }
 
   }

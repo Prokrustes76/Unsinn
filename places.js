@@ -14,19 +14,19 @@ class Town{
   }
 
   createObjects() {
-    let list = game.objects.filter(o => !(o instanceof Creature))
-    for (let o of this.npcs) {
-      list.push(o.button)
-      if (o.pos.x < 800) {
-        if (o.options)
-          for (let b of o.options)
-            list.push(b)
-        if (o.products)
-          for (let s of o.products.slots) 
-            list.push(s)
+    let list = game.objects.filter(o => !(o instanceof Creature) && !(o instanceof Spell))
+    for (let npc of this.npcs) {
+      list.push(npc.button)
+      if (npc.pos.x < 600) {
+        if (npc.options)
+          for (let option of npc.options)
+            list.push(option)
+        if (npc.products && npc.name != 'Smith')
+          for (let slot of npc.products.slots) 
+            list.push(slot)
       }
-    if (this.npcs[3].pos.x > 600)
-      this.npcs[3].optionStart()
+    if (npc.pos.x > 600 && npc.optionStart)
+      npc.optionStart()
     }
     this.objects = list
   }
@@ -74,6 +74,7 @@ class NPC {
     this.pic      = [info.smith, info.vendor, info.jeweler, info.trainer][nr]
     this.name     = ['Smith', 'Vendor', 'Jeweler', 'Trainer'][nr]
     this.pos      = {x : 1000, y : 48 + nr * 150 , w : 500, h : 154}
+    this.phase    = 'optionStart'
     this.button   = new Button(965, 50 + nr * 150, 30, 150, '◀', 'push', nr)
 
     if (this.nr != 3) {
@@ -84,29 +85,27 @@ class NPC {
   }
 
   init(nr) {
+    this.options = []
     if (nr != 3) {
-      for (let i = 0; i < 12; i++) 
+      for (let i = 0, max = nr == 0 ? 24 : 12; i < max; i++) 
         this.products.slots.push(new Slot(i + 12 * (this.nr + 1)))
       this.fillVendorSlots()
     }
+    if (this.optionStart) this.optionStart()
   }
 
-  newItemForSmith(zufall) {
-    let gibtsWand = Math.random() < .05
-    let level = 69 + healer.inv[5].level + Math.round(Math.random() * .8)
-    return gibtsWand ? new Weapon(level) : new Armor(zufall)
+  newItemForSmith(isWeapon) {
+    let healLev  = Math.floor((Math.random() * (healer.level + 2) / 3))
+    let zufall   = Math.floor(Math.random() * (isWeapon ? 6 : 13)) * 5 + healLev
+    return isWeapon ? new Weapon(zufall) : new Armor(zufall)
   }
 
   fillVendorSlots() {
     if (this.nr == 0) {
-      let healLev = Math.floor((healer.level + 1) / 2)
-      for (let i = 0; i < 12; i++) {
-        let level = i < 6 ? healLev - 1 : healLev
-        let zufall = Math.floor(Math.random() * 13) * 5 + level
-        this.products.slots[i].putIntoSlot (this.newItemForSmith(zufall))
-      }
-      
+      for (let i = 0; i < 24; i++) 
+        this.products.slots[i].putIntoSlot (this.newItemForSmith(i < 12)) 
     }
+
     if (this.nr == 1) {
       let lev = Math.floor(healer.level / 4)
       let list = [[0, 0],   [0, 1],   [0, 2],   [1, 0],   [1, 1],   [1, 2],
@@ -119,9 +118,7 @@ class NPC {
   checkInventory() {
     for (let s of this.products.slots)
       if (!s.content || game.timePassed - s.content.createdTime > 4 * 60 * 60) {
-        let zufall = Math.floor(Math.random() * 13) * 5
-            zufall += Math.floor((healer.level / 2) * (Math.random() * .5 + .5))
-        s.content = this.newItemForSmith(zufall)
+        s.content = this.newItemForSmith(this.products.slots.indexOf(s) < 12)
       }
   }
   
@@ -129,19 +126,52 @@ class NPC {
     rect(x, y, w, h, '#333')
     ctx.drawImage(this.pic, 500, y + 5, 110, 144)
 
-    if (this.name == 'Smith') 
-      for (let s of this.products.slots)
-        s.show()
-    
+    if (this.name == 'Smith') {
+      if (this.phase == 'optionStart') 
+        this.optionStart() 
+      else  {
+        let offSet = this.phase == 'weaponChoice' ? 0 : 12; 
+        for (let i = 0; i < 12; i++)
+          this.products.slots[i + offSet].show()
+      }
+    }
   }
 
+  optionStart() {
+    this.phase   = 'optionStart'
+    this.options = []
+    if (this.name == 'Smith')
+      for (let i = 0; i < 3; i++)
+        this.options.push(new Button(625 + i * 120, 75, 100, 100, ['Weapons', 'Armor', ''][i], 'TrainerOptions'))
+  }
+
+  clicked(button) {
+    if (this.phase == 'optionStart' && button.text == 'Weapons') 
+      this.showWeapons()
+    if (this.phase == 'optionStart' && button.text == 'Armor')
+      this.showArmor()       
+    game.town.createObjects()
+  }
+
+  showWeapons() {
+    this.phase   ='weaponChoice'
+    this.options = []
+    for (let i = 0; i < 12; i++)
+      this.options.push(this.products.slots[i])
+  }
+
+  showArmor() {
+    this.phase   ='armorChoice'
+    this.options = []
+    for (let i = 0; i < 12; i++)
+      this.options.push(this.products.slots[i + 12])
+  }
+  
 }
 
 class Trainer extends NPC{
   constructor(nr, pos) {
     super(nr, pos)
-    this.options = []
-    this.phase   ='optionStart'
     this.optionStart()
   }
 
